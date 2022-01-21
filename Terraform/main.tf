@@ -95,3 +95,129 @@ resource "aws_route_table_association" "CICD_Public_with_public" {
     subnet_id = aws_subnet.CICD_PublicSubnet
     route_table_id = aws_route_table.CICD_PublicTable
 }
+
+
+## Security Groups
+### Jenkins Master Security Group
+resource "aws_security_group" "CICD_SG_JenkinsMaster" {
+    name = "JenkinsMaster CICD"
+    description = "Security Group for Jenkins Master"
+    vpc_id = aws_vpc.vpc_cicd.id
+
+  #inbound
+    ingress {
+        description = "Public SSH"
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress {
+        description = "Web interface"
+        from_port = 8080
+        to_port = 8080
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress {
+        description = "ICMPv4"
+        from_port = -1
+        to_port = -1
+        protocol = "icmp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  #outbound
+    egress {
+        from_port        = 0
+        to_port          = 0
+        protocol         = "-1"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+    }
+
+    tags = {
+        Name = "JenkinsMaster SG"
+    }
+}
+
+
+### Jenkins Slave SG
+resource "aws_security_group" "CICD_SG_JenkinsSlave" {
+    name = "JenkinsSlave CICD"
+    description = "Security Group for Jenkins Slave"
+    vpc_id = aws_vpc.vpc_cicd.id
+
+  #inbound
+    ingress {
+        description = "Public SSH"
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress {
+        description = "ICMPv4"
+        from_port = -1
+        to_port = -1
+        protocol = "icmp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+  #outbound
+    egress {
+        from_port        = 0
+        to_port          = 0
+        protocol         = "-1"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+    }
+
+    tags = {
+        Name = "JenkinsSlave SG"
+    }
+}
+
+
+### WebServer SG
+resource "aws_security_group" "CICD_SG_Web" {
+    name = "Webserver CICD"
+    description = "Security Group for Webserver CICD"
+    vpc_id = aws_vpc.vpc_cicd.id
+
+  #inbound
+    ingress {
+        description = "Public SSH"
+        from_port = 22
+        to_port = 22
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress {
+        description = "HTTP"
+        from_port = 80
+        to_port = 80
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress {
+        description = "ICMPv4"
+        from_port = -1
+        to_port = -1
+        protocol = "icmp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    #outbound
+    egress {
+        from_port        = 0
+        to_port          = 0
+        protocol         = "-1"
+        cidr_blocks      = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+    }
+
+    tags = {
+        Name = "Webserver SG"
+    }
+}
