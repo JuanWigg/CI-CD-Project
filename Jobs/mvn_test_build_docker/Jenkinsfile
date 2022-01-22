@@ -1,0 +1,33 @@
+pipeline {
+    agent { label 'slave'}
+
+        stages {
+            stage ('Test') {
+                steps {
+                    script{
+                        sh ''' 
+                            git clone https://github.com/JuanWigg/CI-CD-Project.git
+                            cd CI-CD-Project/App
+                            mvn clean compile test
+                        '''
+                    }              
+                }
+            }
+
+            stage ('Build') {
+                steps {
+                    dir("build_java"){
+                        sh "mvn -f pom.xml clean install -Dmaven.test.skip=true"
+                        sh "tree"
+                    }   
+                }
+            }
+  
+            stage ('Create and Upload Docker Image') {
+                steps {
+                 echo "creando docker"
+                }
+
+            }
+        }
+}
