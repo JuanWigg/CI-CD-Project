@@ -116,6 +116,13 @@ resource "aws_security_group" "CICD_SG_JenkinsMaster" {
         cidr_blocks = ["0.0.0.0/0"]
     }
     ingress {
+        description = "SSH to Slave"
+        from_port = 2222
+        to_port = 2222
+        protocol = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress {
         description = "Web interface"
         from_port = 8080
         to_port = 8080
@@ -130,6 +137,21 @@ resource "aws_security_group" "CICD_SG_JenkinsMaster" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 
+    ## HTTP from private subnet so NAT works
+    ingress {
+        description = "HTTP from private"
+        from_port = 80
+        to_port = 80
+        protocol = "tcp"
+        cidr_blocks = ["172.16.0.128/25"]
+    }
+    ingress {
+        description = "HTTPS from private"
+        from_port = 443
+        to_port = 443
+        protocol = "tcp"
+        cidr_blocks = ["172.16.0.128/25"]
+    }
   #outbound
     egress {
         from_port        = 0
@@ -294,7 +316,9 @@ resource "aws_instance" "ec2_jenkins_master"{
   
   user_data = <<-EOF
                 #!/bin/bash
+                sudo echo '1'>/proc/sys/net/ipv4/ip_forward
                 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+                sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 2222 -j DNAT --to 172.16.0.140:22
                 sudo apt-get update
                 sudo apt-get install openjdk-11-jre-headless -y
                 sudo wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
@@ -302,7 +326,6 @@ resource "aws_instance" "ec2_jenkins_master"{
                 sudo apt-get update
                 sudo apt-get -y install jenkins 
                 sudo systemctl start jenkins
-                sudo echo '1'>/proc/sys/net/ipv4/ip_forward
                 EOF
 
 
@@ -312,5 +335,30 @@ resource "aws_instance" "ec2_jenkins_master"{
 }
 
 
-
 ### Jenkins Slave
+resource "aws_instance" "ec2_jenkins_slave"{
+  ami = "ami-04505e74c0741db8d"
+  instance_type = "t2.micro"
+  availability_zone = "us-east-1a"
+  key_name = "DevOps2022"
+
+  network_interface {
+    device_index = 0
+    network_interface_id = aws_network_interface.jenkins_slave_nic1.id
+
+  }
+
+
+  
+  user_data = <<-EOF
+                #!/bin/bash
+                sudo apt-get update
+                sudo apt-get install openjdk-11-jre-headless maven docker.io -y
+                EOF
+
+
+  tags = {
+    Name = "CICDJenkinsSlave"
+  }
+  depends_on = [aws_instance.ec2_jenkins_master]
+}
