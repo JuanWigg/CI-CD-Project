@@ -267,7 +267,7 @@ resource "aws_eip" "jenkinsmaster_eip"{
   vpc = true
   network_interface = aws_network_interface.jenkins_master_nic1.id
   associate_with_private_ip = "172.16.0.6"
-  depends_on = [aws_internet_gateway.CICD_InternetGW]
+  depends_on = [aws_internet_gateway.CICD_InternetGW, aws_instance.ec2_jenkins_master]
 }
 
 
@@ -296,14 +296,13 @@ resource "aws_instance" "ec2_jenkins_master"{
                 #!/bin/bash
                 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
                 sudo apt-get update
-                sudo apt-get upgrade -y
-                sudo apt-get install openjdk-8-jre-headless -y
-                wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
-                sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+                sudo apt-get install openjdk-11-jre-headless -y
+                sudo wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+                sudo echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list
                 sudo apt-get update
-                sudo apt-get install jenkins -y
+                sudo apt-get -y install jenkins 
                 sudo systemctl start jenkins
-                echo "1">/proc/sys/net/ipv4/ip_forward
+                sudo echo '1'>/proc/sys/net/ipv4/ip_forward
                 EOF
 
 
@@ -311,3 +310,7 @@ resource "aws_instance" "ec2_jenkins_master"{
     Name = "CICDJenkinsMaster"
   }
 }
+
+
+
+### Jenkins Slave
