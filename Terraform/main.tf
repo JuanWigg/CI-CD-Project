@@ -291,6 +291,12 @@ resource "aws_eip" "jenkinsmaster_eip"{
   associate_with_private_ip = "172.16.0.6"
   depends_on = [aws_internet_gateway.CICD_InternetGW, aws_instance.ec2_jenkins_master]
 }
+resource "aws_eip" "webserver_eip"{
+  vpc = true
+  network_interface = aws_network_interface.webserver_nic1.id
+  associate_with_private_ip = "172.16.0.7"
+  depends_on = [aws_internet_gateway.CICD_InternetGW, aws_instance.ec2_web_server]
+}
 
 
 
@@ -361,4 +367,31 @@ resource "aws_instance" "ec2_jenkins_slave"{
     Name = "CICDJenkinsSlave"
   }
   depends_on = [aws_instance.ec2_jenkins_master]
+}
+
+### Web server
+resource "aws_instance" "ec2_web_server"{
+  ami = "ami-04505e74c0741db8d"
+  instance_type = "t2.micro"
+  availability_zone = "us-east-1a"
+  key_name = "DevOps2022"
+
+  network_interface {
+    device_index = 0
+    network_interface_id = aws_network_interface.webserver_nic1.id
+
+  }
+
+
+  
+  user_data = <<-EOF
+                #!/bin/bash
+                sudo apt-get update
+                sudo apt-get install docker.io -y
+                EOF
+
+
+  tags = {
+    Name = "CICDWebserver"
+  }
 }
