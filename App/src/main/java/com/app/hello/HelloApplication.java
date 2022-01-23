@@ -12,7 +12,7 @@ public class HelloApplication {
 
 	@GetMapping("/")
 	public String index() {
-		return "Hello World!";
+		return "Hello World! Small change ;)";
 	}
 	
 	public static void main(String[] args) {
