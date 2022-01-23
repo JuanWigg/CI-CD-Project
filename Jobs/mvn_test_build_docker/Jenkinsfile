@@ -22,6 +22,7 @@ pipeline {
                     script{
                         
                         sh '''
+                            cd CI-CD-Project/App
                             echo "Building the JAR file..."
                             mvn -f pom.xml clean install -Dmaven.test.skip=true
                             echo "JAR file build!"
