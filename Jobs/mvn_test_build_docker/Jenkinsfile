@@ -44,5 +44,18 @@ pipeline {
 
             }
         }
+        post {
+            always {
+                echo 'Jobs finished!'
+                deleteDir() /* clean up our workspace */
+            }
+            success {
+                echo 'Trigger deploy job!'
+            }  
+            failure {
+                echo 'Something failed..'
+            }
+
+    }
 
 }
