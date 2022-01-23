@@ -36,7 +36,7 @@ pipeline {
                 steps {
                     script{
                         withCredentials([string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO')]) { //set SECRET with the credential content
-                            sh '$(aws ecr get-login --no-include-email --region us-east-1'
+                            sh '$(aws ecr get-login --no-include-email --region us-east-1)'
                             sh '''
                                 echo "Creating Docker image..."
                                 cd CI-CD-Project/App
