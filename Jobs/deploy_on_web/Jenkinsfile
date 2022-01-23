@@ -25,7 +25,7 @@ pipeline {
                         withCredentials([string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO')]) { //set SECRET with the credential content
                                 sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPO'
                                 sh 'echo "Running image.."'
-                                sh 'docker run --rm -dtp 8080:80 --name spring-boot-docker $ECR_REPO:latest'
+                                sh 'docker run --rm -d -p 80:8080 --name spring-boot-docker $ECR_REPO:latest'
                         }
                     }
                 }
