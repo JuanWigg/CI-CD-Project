@@ -360,6 +360,7 @@ resource "aws_instance" "ec2_jenkins_slave"{
                 #!/bin/bash
                 sudo apt-get update
                 sudo apt-get install openjdk-11-jre-headless maven docker.io -y
+                sudo usermod -aG docker ubuntu
                 EOF
 
 
@@ -387,7 +388,8 @@ resource "aws_instance" "ec2_web_server"{
   user_data = <<-EOF
                 #!/bin/bash
                 sudo apt-get update
-                sudo apt-get install docker.io -y
+                sudo apt-get install docker.io openjdk-11-jre-headless -y
+                sudo usermod -aG docker ubuntu
                 EOF
 
 
