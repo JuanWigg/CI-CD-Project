@@ -45,9 +45,9 @@ pipeline {
                                 echo "Docker Image Build!"
                                 echo "Tagging image.."
                             '''
-                            sh 'docker tag spring-boot-docker:latest $ECR_REPO/spring-boot-docker:latest'
+                            sh 'docker tag spring-boot-docker:latest $ECR_REPO:latest'
                             sh 'echo Uploading image...'
-                            sh 'docker push $ECR_REPO/spring-boot-docker:latest'
+                            sh 'docker push $ECR_REPO:latest'
                             sh 'echo Image uploaded!'
                         }
                         
