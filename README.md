@@ -8,22 +8,16 @@ First of all, you need to deploy the infraestructure using the Terraform file *(
 ### Step 2
 Enter to the Jenkins Master using *ip:8080* and configure the new Admin user. 
 
-
 ### Step 3
 After creating our admin user, we need to add more nodes to our Jenkinsmaster. We can do this by going to *http://JenkinsIP:8080/manage -> Config nodes -> Add node*
-![Jenkins Add Node](/assets/images/JenkinsAddNode.png)
 
 ### Step 4
 Configure first pipeline using the Jenkinsfile located at *Jobs/mvn_test_build_docker* folder. 
-![Jenkins Build Job](/assets/images/JenkinsBuildJob.png)
-
-
 Also, use the **"GitHub hook trigger for GITScm polling" Build Trigger** and remember to put the URL of the GitHub repo on the *GitHub Project* field.
-![GitHub Build Trigger](/assets/images/GithubBuildTrigger.png)
 
 
 ### Step 5
 Configure the second pipeline for the project. This time we will use the Jenkinsfile located at *Jobs/deploy_on_web* folder.
 On the build trigger section we gotta use the **"Build after other projects" Build Trigger** and we need to specify the previous pipeline we created.
-![Build By Project](/assets/images/BuildByProject.png)
+
 Remember to select the appropiate Jenkinsfile for the pipeline like we did on the previous step.
