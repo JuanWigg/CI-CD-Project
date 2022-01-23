@@ -1,0 +1,46 @@
+pipeline {
+    agent { label 'webserver'}
+
+        stages {
+             stage ('Remove previous container') {
+                when{
+                    expression{
+                        DOCKER_EXISTS = sh(returnStdout: true, script: 'echo "$(docker ps -q --filter name=spring-boot-docker)"').trim()
+                        return DOCKER_EXISTS != ''
+                    }
+                }
+                steps {
+                    script{
+                        sh ''' 
+                            echo "Removing previous running container"
+                            docker stop spring-boot-docker
+                            echo "Container removed!"
+                        '''
+                    }              
+                }
+            }
+            stage ('Pull newer image and run the app') {
+                script{
+                    withCredentials([string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO')]) { //set SECRET with the credential content
+                            sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPO'
+                            sh 'echo "Running image.."'
+                            sh 'docker run --rm -dtp 8080:80 --name spring-boot-docker $ECR_REPO:latest'
+                    }
+                }
+            } 
+        }
+        post {
+            always {
+                echo 'Job finished!'
+                deleteDir() /* clean up our workspace */
+            }
+            success {
+                echo 'App deployed succesfully!'
+            }  
+            failure {
+                echo 'Something failed..'
+            }
+
+    }
+
+}
